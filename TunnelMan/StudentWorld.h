@@ -13,10 +13,8 @@ class Actor;
 class StudentWorld : public GameWorld
 {
 public:
-    StudentWorld(std::string assetDir)
-        : GameWorld(assetDir)
-    {
-    }
+    StudentWorld(std::string assetDir);
+    ~StudentWorld();
 
     void digField(int x, int y);
     bool isthereEarth(int x, int y);
@@ -24,14 +22,11 @@ public:
 
     virtual int move();
 
-    virtual void cleanUp()
-    {
-    }
+    virtual void cleanUp();
 
 private:
     Tunnelman* player;
-    Earth* earthPtrs[64][64];
-    Actor* thisgame;
+    Earth* earthPtrs[VIEW_WIDTH][VIEW_HEIGHT];
 };
 
 #endif // STUDENTWORLD_H_

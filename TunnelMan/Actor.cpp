@@ -6,6 +6,12 @@
 Actor::Actor(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth) : GraphObject(imageID, startX, startY, dir, size, depth) {
     m_world = sw;
 }
+
+Actor::~Actor() {
+    
+}
+
+
 StudentWorld* Actor::getWorld() {
     return m_world;
 }
@@ -16,12 +22,21 @@ StudentWorld* Actor::getWorld() {
 Earth::Earth(StudentWorld* sw, int startX, int startY) : Actor(sw, TID_EARTH, startX, startY, right, .25, 3) {
     setVisible(true);
 }
+void Earth::doSomething() {
+    return;
+}
+Earth::~Earth() {
+    
+}
 
 
 Tunnelman::Tunnelman(StudentWorld* sw) : Actor(sw, TID_PLAYER, 30, 60, right, 1, 0) {
     isAlive = true;
     setVisible(true);
 
+}
+Tunnelman::~Tunnelman() {
+    
 }
 
 void Tunnelman::doSomething() {
