@@ -10,16 +10,10 @@ GameWorld* createStudentWorld(string assetDir)
 
 StudentWorld::StudentWorld(std::string assetDir) : GameWorld(assetDir)
 {
-    player = nullptr;
 }
 
 StudentWorld::~StudentWorld() {
-    delete player;
-    for (int x = 0; x < VIEW_WIDTH; x++) {
-        for (int y = 0; y < VIEW_HEIGHT; y++) {
-            delete earthPtrs[x][y];
-        }
-    }
+    
     
 }
 
