@@ -1,14 +1,24 @@
 #include "Actor.h"
+#include <string>
+#include <iostream>
+using namespace std;
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
 
 Actor::Actor(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth) : GraphObject(imageID, startX, startY, dir, size, depth) {
     m_world = sw;
+    m_isAlive = true;
 }
 
 Actor::~Actor() {
     
+}
+bool Actor::isAlive() {
+    return m_isAlive;
+}
+void Actor::setDead() {
+    m_isAlive = false;
 }
 
 
@@ -31,12 +41,75 @@ Earth::~Earth() {
 
 
 Tunnelman::Tunnelman(StudentWorld* sw) : Actor(sw, TID_PLAYER, 30, 60, right, 1, 0) {
-    isAlive = true;
     setVisible(true);
+    m_hp = 10;
+    m_waterUnits = 5;
+    m_numSonar = 1;
+    m_numGold = 0;
 
 }
 Tunnelman::~Tunnelman() {
     
+}
+
+//int Tunnelman::hp() const {
+//    return m_hp;
+//}
+//int Tunnelman::numWater() const {
+//    return m_waterUnits;
+//}
+//int Tunnelman::numSonar() const {
+//    return m_numSonar;
+//}
+
+Boulder::Boulder(StudentWorld* sw, int startX, int startY) : Actor(sw, TID_BOULDER, startX, startY, down, 1, 1) {
+    setVisible(true);
+    m_state = stable;
+    waitingNum = 30;
+}
+Boulder::~Boulder() {
+}
+
+void Boulder::setState(string state) {
+    m_state = state;
+}
+
+void Boulder::doSomething(){
+    if (!isAlive()) {
+        return;
+    }
+    int x = getX();
+    int y = getY();
+    //if it's stable, set to waiting.
+    if (getState() == stable) {
+        if (!getWorld()->isthereEarth(x, y-1)) {
+            setState(waiting);
+        }
+    }
+    if (waitingNum == 0) {
+        setState(falling);
+        getWorld()->playSound(SOUND_FALLING_ROCK);
+        waitingNum = -1;
+    }
+    
+    if (getState() == falling) {
+        // As long as there isn't earth below and y is valid we can move down
+        // TODO: check for a bolder
+        if (y == -1 || getWorld() -> isthereEarth(x, y-1)) {
+            setDead();
+        }
+        if (!getWorld()->isthereEarth(x, y-1)) {
+            moveTo(x, y-1);
+        }
+        
+        // Need to figure out how to not run into other boulders. I think something like we had in Zion like nRobotsAt?? like a function to check if a boulder/object is at that location. Maybe it could take in a class type so we can template it for other classess???
+        
+    }
+    // TODO: check if it's near a Protestor or Tunnelman & annoy them.
+    // Decrement each tick if waiting to fall
+    if (getState() == waiting) {
+        waitingNum--;
+    }
 }
 
 void Tunnelman::doSomething() {
@@ -103,6 +176,9 @@ void Tunnelman::doSomething() {
         case KEY_PRESS_SPACE:
 
             break;
+        case KEY_PRESS_ESCAPE:
+                setDead();
+                break;
         case none:
             return;
             // etcÖ

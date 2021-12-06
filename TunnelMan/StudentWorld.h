@@ -4,6 +4,7 @@
 #include "GameWorld.h"
 #include "GameConstants.h"
 #include <string>
+#include <vector>
 class GraphObject;
 class Earth;
 class Tunnelman;
@@ -27,6 +28,7 @@ public:
 private:
     Tunnelman* player;
     Earth* earthPtrs[VIEW_WIDTH][VIEW_HEIGHT];
+    std::vector<Actor*> actorPtrs;
 };
 
 #endif // STUDENTWORLD_H_

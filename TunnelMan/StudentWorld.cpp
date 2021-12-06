@@ -1,6 +1,9 @@
 #include "StudentWorld.h"
 #include "Actor.h"
+#include <algorithm>
 #include <string>
+#include <iostream>
+#include <vector>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -30,6 +33,17 @@ int StudentWorld::init()
         }
     }
     player = new Tunnelman(this);
+    
+    // Create boulders where # of boulders  min(current_level_number/2+2, 9)
+    // Boulders must be distributed between x=0,y=20 and x=60,y=56, inclusive (so
+    // they have room to fall).
+    int numBoulders = std::min((static_cast<int>(getLevel())/2)+2, 9);
+    for (int i = 0; i < numBoulders; i ++) {
+        int x = rand() % 61;
+        int y = rand() %(57-20 +1) + 20;
+        actorPtrs.push_back(new Boulder(this, x, y));
+        digField(x, y);
+    }
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -40,6 +54,22 @@ int StudentWorld::move()
     //
     decLives();
     player->doSomething();
+    vector<Actor*>::iterator it;
+    it = actorPtrs.begin();
+    while (it != actorPtrs.end()) {
+        (*it)->doSomething();
+        it++;
+    }
+    it = actorPtrs.begin();
+    while (it != actorPtrs.end()) {
+        if (!(*it)->isAlive()) {
+            delete (*it);
+            actorPtrs.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
     return GWSTATUS_CONTINUE_GAME;
 }
 
