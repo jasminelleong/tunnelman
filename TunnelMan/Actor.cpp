@@ -52,15 +52,18 @@ Tunnelman::~Tunnelman() {
     
 }
 
-//int Tunnelman::hp() const {
-//    return m_hp;
-//}
-//int Tunnelman::numWater() const {
-//    return m_waterUnits;
-//}
-//int Tunnelman::numSonar() const {
-//    return m_numSonar;
-//}
+int Tunnelman::hp() const {
+    return m_hp;
+}
+int Tunnelman::numWater() const {
+    return m_waterUnits;
+}
+int Tunnelman::numSonar() const {
+    return m_numSonar;
+}
+int Tunnelman::numGold() const {
+    return m_numGold;
+}
 
 Boulder::Boulder(StudentWorld* sw, int startX, int startY) : Actor(sw, TID_BOULDER, startX, startY, down, 1, 1) {
     setVisible(true);

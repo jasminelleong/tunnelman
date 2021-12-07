@@ -78,5 +78,12 @@ private:
     
 };
 
+class Protestor : public Actor {
+public:
+    Protestor(StudentWorld* sw, int startX, int startY);
+    ~Protestor();
+    
+};
+
 
 #endif // ACTOR_H_

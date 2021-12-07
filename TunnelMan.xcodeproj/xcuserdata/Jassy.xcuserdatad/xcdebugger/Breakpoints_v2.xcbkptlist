@@ -14,8 +14,8 @@
             filePath = "TunnelMan/Actor.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "170"
-            endingLineNumber = "170"
+            startingLineNumber = "173"
+            endingLineNumber = "173"
             landmarkName = "Tunnelman::doSomething()"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "TunnelMan/StudentWorld.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "89"
-            endingLineNumber = "89"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
             landmarkName = "StudentWorld::digField(x, y)"
             landmarkType = "7">
          </BreakpointContent>
@@ -46,8 +46,8 @@
             filePath = "TunnelMan/Actor.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "189"
-            endingLineNumber = "189"
+            startingLineNumber = "192"
+            endingLineNumber = "192"
             landmarkName = "Tunnelman::doSomething()"
             landmarkType = "7">
          </BreakpointContent>
@@ -62,8 +62,8 @@
             filePath = "TunnelMan/StudentWorld.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
+            startingLineNumber = "66"
+            endingLineNumber = "66"
             landmarkName = "StudentWorld::move()"
             landmarkType = "7">
          </BreakpointContent>

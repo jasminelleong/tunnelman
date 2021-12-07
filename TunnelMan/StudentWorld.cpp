@@ -52,15 +52,26 @@ int StudentWorld::move()
     /// This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
     // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
     //
-    decLives();
-    player->doSomething();
+    setDisplayText();
+    
+    if (player->isAlive()) {
+        player->doSomething();
+    }
+    else {
+        return GWSTATUS_PLAYER_DIED;
+    }
+    // Iterate through actor vector and allow everyone a chance to do something
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
     while (it != actorPtrs.end()) {
-        (*it)->doSomething();
+        if ((*it)->isAlive()) {
+            (*it)->doSomething();
+        }
         it++;
     }
     it = actorPtrs.begin();
+    
+    
     while (it != actorPtrs.end()) {
         if (!(*it)->isAlive()) {
             delete (*it);
@@ -82,6 +93,21 @@ void StudentWorld::cleanUp()
         }
     }
 }
+
+void StudentWorld::setDisplayText(){
+    int level = getLevel();
+    int lives = getLives();
+    int health = player->hp();
+    int squirts = player->numWater();
+    int gold = player->numGold();
+    int barrelsLeft = 111;
+    int sonar = player->numSonar();
+    int score = getScore();
+    string s;
+    s = "Lvl: " + std::to_string(level) + " Lives: " + std::to_string(lives) + " Hlth: " + std::to_string(health) + "% Wtr: " + std::to_string(squirts) + " Gld: " + std::to_string(gold) + " Oil Left: " + std::to_string(barrelsLeft) + " Sonar: " + std::to_string(sonar) + " Scr: " + std::to_string(score);
+    setGameStatText(s);
+}
+
 
 // Students:  Add code to this file (if you wish), StudentWorld.h, Actor.h and Actor.cpp
 /*Remove/destroy the Earth objects from the 4x4 area occupied by

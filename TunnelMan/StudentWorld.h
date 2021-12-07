@@ -24,6 +24,7 @@ public:
     virtual int move();
 
     virtual void cleanUp();
+    void setDisplayText();
 
 private:
     Tunnelman* player;
