@@ -12,7 +12,7 @@ Actor::Actor(StudentWorld* sw, int imageID, int startX, int startY, Direction di
 }
 
 Actor::~Actor() {
-    
+
 }
 bool Actor::isAlive() {
     return m_isAlive;
@@ -36,7 +36,7 @@ void Earth::doSomething() {
     return;
 }
 Earth::~Earth() {
-    
+
 }
 
 
@@ -49,7 +49,7 @@ Tunnelman::Tunnelman(StudentWorld* sw) : Actor(sw, TID_PLAYER, 30, 60, right, 1,
 
 }
 Tunnelman::~Tunnelman() {
-    
+
 }
 
 int Tunnelman::hp() const {
@@ -69,7 +69,9 @@ Boulder::Boulder(StudentWorld* sw, int startX, int startY) : Actor(sw, TID_BOULD
     setVisible(true);
     m_state = stable;
     waitingNum = 30;
+ 
 }
+
 Boulder::~Boulder() {
 }
 
@@ -77,7 +79,7 @@ void Boulder::setState(string state) {
     m_state = state;
 }
 
-void Boulder::doSomething(){
+void Boulder::doSomething() {
     if (!isAlive()) {
         return;
     }
@@ -85,7 +87,7 @@ void Boulder::doSomething(){
     int y = getY();
     //if it's stable, set to waiting.
     if (getState() == stable) {
-        if (!getWorld()->isthereEarth(x, y-1)) {
+        if (!getWorld()->isthereEarth(x, y - 1)) {
             setState(waiting);
         }
     }
@@ -94,19 +96,19 @@ void Boulder::doSomething(){
         getWorld()->playSound(SOUND_FALLING_ROCK);
         waitingNum = -1;
     }
-    
+
     if (getState() == falling) {
         // As long as there isn't earth below and y is valid we can move down
         // TODO: check for a bolder
-        if (y == -1 || getWorld() -> isthereEarth(x, y-1)) {
+        if (y == -1 || getWorld()->isthereEarth(x, y - 1)) {
             setDead();
         }
-        if (!getWorld()->isthereEarth(x, y-1)) {
-            moveTo(x, y-1);
+        if (!getWorld()->isthereEarth(x, y - 1)) {
+            moveTo(x, y - 1);
         }
-        
+
         // Need to figure out how to not run into other boulders. I think something like we had in Zion like nRobotsAt?? like a function to check if a boulder/object is at that location. Maybe it could take in a class type so we can template it for other classess???
-        
+
     }
     // TODO: check if it's near a Protestor or Tunnelman & annoy them.
     // Decrement each tick if waiting to fall
@@ -114,11 +116,72 @@ void Boulder::doSomething(){
         waitingNum--;
     }
 }
+Goodies::Goodies(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth) : Actor(sw, imageID, startX, startY, dir, size, depth) {
+
+}
+Goodies::~Goodies() {
+    
+}
+
+Barrel::Barrel(StudentWorld* sw, int startX, int startY, Tunnelman* p) : Goodies(sw, TID_BARREL, startX, startY, right, 1, 2) {
+    m_x = startX;
+    m_y = startY;
+    playerInGame = p;
+    //count++;
+}
+
+void Barrel::doSomething() {
+    if (!isAlive()) {
+        return;
+    }
+    int x = playerInGame->getX();
+    int y = playerInGame->getY();
+   
+    
+    // If not foudn yet, if it's within 4 of tunnelman, found it
+    if (found != true) {
+        if (getX() - 4 <= x && x <= getX() + 4) {
+            if (getY() - 4 <= y && y <= getY() + 4) {
+                setVisible(true);
+                found = true;
+                return;
+            }
+
+        }
+    }
+    
+    
+    // If found, set Dead, play sound, increase score, decrement barrels
+    else {
+        if (m_x - 3 <= x && x <= m_x + 3) {
+            if (m_y - 3 <= y && y <= m_y + 3) {
+                setDead();
+                getWorld()->playSound(SOUND_FOUND_OIL);
+                getWorld()->increaseScore(1000);
+                getWorld()->decrementBarrelCount();
+                
+            }
+            
+        }
+    }
+   
+
+   
+}
+void Barrel::makeVisible() {
+    found = true;
+
+}
+Barrel::~Barrel() {
+}
+void Barrel::setState(string state) {
+    m_state = state;
+}
 
 void Tunnelman::doSomething() {
 
     int ch;
-   
+
     if (getWorld()->getKey(ch) == true)
     {
         // user hit a key this tick!
@@ -130,7 +193,7 @@ void Tunnelman::doSomething() {
                 break;
             }
             if (getX() != 0) {
-                moveTo(getX()-1, getY());
+                moveTo(getX() - 1, getY());
             }
 
             break;
@@ -140,12 +203,12 @@ void Tunnelman::doSomething() {
                 break;
             }
             if (getX() != 60) {
-                moveTo(getX()+1, getY());
-//                if (m_world->isthereEarth(getX()+1, getY())) {
-//                    m_world->digField(getX()+1, getY());
-//                    m_world->digField(getX()+2, getY());
-//                    m_world->playSound(SOUND_DIG);
-//                }
+                moveTo(getX() + 1, getY());
+                //                if (m_world->isthereEarth(getX()+1, getY())) {
+                //                    m_world->digField(getX()+1, getY());
+                //                    m_world->digField(getX()+2, getY());
+                //                    m_world->playSound(SOUND_DIG);
+                //                }
             }
             break;
         case KEY_PRESS_UP:
@@ -153,13 +216,13 @@ void Tunnelman::doSomething() {
                 this->setDirection(up);
                 break;
             }
-                
+
             if (getY() != 60) {
-                moveTo(getX(), getY()+1);
-//                if (m_world->isthereEarth(getX(), getY())) {
-//                    m_world->digField(getX(), getY());
-//                    m_world->playSound(SOUND_DIG);
-//                }
+                moveTo(getX(), getY() + 1);
+                //                if (m_world->isthereEarth(getX(), getY())) {
+                //                    m_world->digField(getX(), getY());
+                //                    m_world->playSound(SOUND_DIG);
+                //                }
             }
 
             break;
@@ -169,32 +232,36 @@ void Tunnelman::doSomething() {
                 break;
             }
             if (getY() != 0) {
-                moveTo(getX(), getY()-1);
-//                if (m_world->isthereEarth(getX(), getY())) {
-//                    m_world->digField(getX(), getY());
-//                    m_world->playSound(SOUND_DIG);
-//                }
+                moveTo(getX(), getY() - 1);
+                //                if (m_world->isthereEarth(getX(), getY())) {
+                //                    m_world->digField(getX(), getY());
+                //                    m_world->playSound(SOUND_DIG);
+                //                }
             }
             break;
         case KEY_PRESS_SPACE:
 
             break;
         case KEY_PRESS_ESCAPE:
-                setDead();
-                break;
+            setDead();
+            break;
         case none:
             return;
             // etcÖ
         }
-//        Direction d = getDirection();
-//        int x = getX();
-//        int y = getY();
-        
+        //        Direction d = getDirection();
+        //        int x = getX();
+        //        int y = getY();
+
         if (getWorld()->isthereEarth(getX(), getY())) {
             getWorld()->digField(getX(), getY());
             getWorld()->playSound(SOUND_DIG);
+           
         }
+        
     }
 }
-
-
+//void Tunnelman::getLocation() {
+//    x = getX();
+//    y = getY();
+//}

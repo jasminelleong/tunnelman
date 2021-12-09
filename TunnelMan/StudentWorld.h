@@ -20,16 +20,22 @@ public:
     void digField(int x, int y);
     bool isthereEarth(int x, int y);
     virtual int init();
+    bool isBoulderthere(int xPos, int yPos);
+    void setLocation(int xPos, int yPos);
+    void setDisplayText();
+    void decrementBarrelCount();
 
     virtual int move();
 
     virtual void cleanUp();
-    void setDisplayText();
 
 private:
     Tunnelman* player;
     Earth* earthPtrs[VIEW_WIDTH][VIEW_HEIGHT];
     std::vector<Actor*> actorPtrs;
+    bool BoulderPtrs[VIEW_WIDTH][VIEW_HEIGHT];
+    int barrelCount = 0;
+    int tick = 0;
 };
 
 #endif // STUDENTWORLD_H_
