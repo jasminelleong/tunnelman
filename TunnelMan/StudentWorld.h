@@ -25,7 +25,7 @@ public:
     void setLocation(int xPos, int yPos);
     void setDisplayText();
     void decrementBarrelCount();
-    bool hasSomething(int xPos, int yPos);
+    bool hasSomething(int xPos, int yPos, std::string& type);
 
     virtual int move();
 

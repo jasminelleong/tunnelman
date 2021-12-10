@@ -19,6 +19,7 @@ public:
     bool isAlive();
     void setDead();
     bool isCoordinate(int otherX, int otherY);
+    virtual std::string classType() = 0;
 
 private:
     StudentWorld* m_world;
@@ -31,6 +32,7 @@ public:
     Earth(StudentWorld* sw, int startX, int startY);
     ~Earth();
     void doSomething();
+    std::string classType();
 };
 
 
@@ -40,6 +42,7 @@ public:
     void doSomething();
     void getLocation();
     ~Tunnelman();
+    std::string classType();
 
     int hp() const;
     int numWater() const;
@@ -66,7 +69,7 @@ public:
         return m_state;
     }
     void setState(std::string state);
-    
+    std::string classType();
   
 private:
     std::string m_state;
@@ -93,6 +96,7 @@ public:
     void doSomething();
     void setState(std::string state);
     void makeVisible();
+    std::string classType();
    
 private:
     std::string m_state;

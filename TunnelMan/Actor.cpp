@@ -5,6 +5,11 @@ using namespace std;
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
+const string earth = "earth";
+const string tunnelman = "tunnelman";
+const string boulder = "boulder";
+const string barrel = "barrel";
+
 
 Actor::Actor(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth) : GraphObject(imageID, startX, startY, dir, size, depth) {
     m_world = sw;
@@ -39,6 +44,10 @@ Earth::~Earth() {
 
 }
 
+string Earth::classType() {
+    return earth;
+}
+
 
 Tunnelman::Tunnelman(StudentWorld* sw) : Actor(sw, TID_PLAYER, 30, 60, right, 1, 0) {
     setVisible(true);
@@ -50,6 +59,10 @@ Tunnelman::Tunnelman(StudentWorld* sw) : Actor(sw, TID_PLAYER, 30, 60, right, 1,
 }
 Tunnelman::~Tunnelman() {
 
+}
+
+string Tunnelman::classType() {
+    return tunnelman;
 }
 
 int Tunnelman::hp() const {
@@ -73,6 +86,9 @@ Boulder::Boulder(StudentWorld* sw, int startX, int startY) : Actor(sw, TID_BOULD
 }
 
 Boulder::~Boulder() {
+}
+string Boulder::classType() {
+    return boulder;
 }
 
 bool Actor::isCoordinate(int otherX, int otherY) {
@@ -113,9 +129,12 @@ void Boulder::doSomething() {
     if (getState() == falling) {
         // As long as there isn't earth below and y is valid we can move down
         // TODO: check for a bolder
-        if (y == -1 || getWorld()->isthereEarth(x, y - 1)) {
-            setDead();
+        string type = "";
+        if (y-1 == -1 || getWorld()->isthereEarth(x, y - 1) || getWorld()->isBoulderthere(x, y-5)) {
+                setDead();
+            
         }
+
         if (!getWorld()->isthereEarth(x, y - 1)) {
             moveTo(x, y - 1);
         }
@@ -137,10 +156,13 @@ Goodies::~Goodies() {
 }
 
 Barrel::Barrel(StudentWorld* sw, int startX, int startY, Tunnelman* p) : Goodies(sw, TID_BARREL, startX, startY, right, 1, 2) {
-    m_x = startX;
-    m_y = startY;
+//    m_x = startX;
+//    m_y = startY;
     playerInGame = p;
     //count++;
+}
+string Barrel::classType() {
+    return barrel;
 }
 
 void Barrel::doSomething() {
@@ -166,8 +188,8 @@ void Barrel::doSomething() {
     
     // If found, set Dead, play sound, increase score, decrement barrels
     else {
-        if (m_x - 3 <= x && x <= m_x + 3) {
-            if (m_y - 3 <= y && y <= m_y + 3) {
+//        if (m_x - 3 <= x && x <= m_x + 3) {
+//            if (m_y - 3 <= y && y <= m_y + 3) {
                 setDead();
                 getWorld()->playSound(SOUND_FOUND_OIL);
                 getWorld()->increaseScore(1000);
@@ -175,8 +197,8 @@ void Barrel::doSomething() {
                 
             }
             
-        }
-    }
+//        }
+//    }
    
 
    
@@ -200,6 +222,7 @@ void Tunnelman::doSomething() {
     if (getWorld()->getKey(ch) == true)
     {
         // user hit a key this tick!
+        string type = "";
         switch (ch)
         {
         case KEY_PRESS_LEFT:
@@ -208,65 +231,73 @@ void Tunnelman::doSomething() {
                 break;
             }
             if (x != 0) {
-                if (!getWorld()->hasSomething(x-1, y)) {
-                    moveTo(x - 1, y);
+                if (!getWorld()->hasSomething(x-1, y, type)) {
+                    if (type != boulder) {
+                        moveTo(x - 1, y);
+                    }
                 }
             }
-
-            break;
-        case KEY_PRESS_RIGHT:
-            if (this->getDirection() != right) {
-                this->setDirection(right);
+                
                 break;
-            }
-            if (x != 60) {
-                if (!getWorld()->hasSomething(x+4, y)) {
-                    moveTo(x + 1, y);
+            case KEY_PRESS_RIGHT:
+                if (this->getDirection() != right) {
+                    this->setDirection(right);
+                    break;
                 }
-            }
-            break;
-        case KEY_PRESS_UP:
-            if (this->getDirection() != up) {
-                this->setDirection(up);
+                if (x != 60) {
+                    if (!getWorld()->hasSomething(x+1, y, type)) {
+                        if (type != boulder) {
+                            moveTo(x + 1, y);
+                        }
+                    }
+                }
                 break;
-            }
-
-            if (y != 60) {
-                if (!getWorld()->hasSomething(x, y+1)) {
-                    moveTo(x, y + 1);
+            case KEY_PRESS_UP:
+                if (this->getDirection() != up) {
+                    this->setDirection(up);
+                    break;
                 }
-            }
-
-            break;
-        case KEY_PRESS_DOWN:
-            if (this->getDirection() != down) {
-                this->setDirection(down);
+                
+                if (y != 60) {
+                    if (!getWorld()->hasSomething(x, y+1, type)) {
+                        if (type != boulder) {
+                            moveTo(x, y + 1);
+                        }
+                    }
+                }
+                
                 break;
-            }
-            if (y != 0) {
-                if (!getWorld()->hasSomething(x, y-1)) {
-                    moveTo(x, y - 1);
+            case KEY_PRESS_DOWN:
+                if (this->getDirection() != down) {
+                    this->setDirection(down);
+                    break;
                 }
-            }
-            break;
-        case KEY_PRESS_SPACE:
-
-            break;
-        case KEY_PRESS_ESCAPE:
-            setDead();
-            break;
-        case none:
-            return;
-            // etcÖ
+                if (y != 0) {
+                    if (!getWorld()->hasSomething(x, y-1, type)) {
+                        if (type != boulder) {
+                            moveTo(x, y - 1);
+                        }
+                    }
+                }
+                break;
+            case KEY_PRESS_SPACE:
+                
+                break;
+            case KEY_PRESS_ESCAPE:
+                setDead();
+                break;
+            case none:
+                return;
+                // etcÖ
         }
         //        Direction d = getDirection();
         //        int x = getX();
         //        int y = getY();
-
+        
         if (getWorld()->isthereEarth(getX(), getY())) {
             getWorld()->digField(getX(), getY());
             getWorld()->playSound(SOUND_DIG);
-           
+            
         }
         
     }

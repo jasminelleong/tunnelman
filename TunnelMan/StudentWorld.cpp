@@ -39,17 +39,18 @@ int StudentWorld::init()
     // they have room to fall).
     //revist the loop that doesnt include the shaft
     int numBoulders = std::min((static_cast<int>(getLevel()) / 2) + 2, 9);
+    string type = "";
     for (int i = 0; i < numBoulders; i++) {
         int x{};
         int y{};
         do {
             do {
                 x = rand() % 61;
+//                x = 17;
             }
             while (x >= 28 && x <= 35);
             y = rand() % (57 - 20 + 1) + 20;
-        }
-        while (isBoulderthere(x, y) == true);
+        } while (hasSomething(x, y, type));
         
         actorPtrs.push_back(new Boulder(this, x, y));
         setLocation(x, y);
@@ -59,18 +60,15 @@ int StudentWorld::init()
     int numBarrels = std::min((static_cast<int>(2+getLevel())), 21);
     for (int i = 0; i < numBarrels; i++) {
         int x{};
+        int y{};
+            // Keep generating x y coordinates if there's something there or it's not in correct bounds
         do {
-            x = rand() % 61;
-        }
-        while (x >= 28 && x <= 35);
-        int y = rand() % (57 - 20 + 1) + 20;
-//        while (isBoulderthere(x, y) == true) {
-//            int x = rand() % 61;
-//            if (x >= 30 && x <= 33) {
-//                x += 8;
-//            }
-//            int y = rand() % (57 - 20 + 1) + 20;
-//        }
+            do {
+                x = rand() % 61;
+            }
+            while (x >= 28 && x <= 35);
+            y = rand() % (57 - 20 + 1) + 20;
+        } while (hasSomething(x, y, type));
         actorPtrs.push_back(new Barrel(this, x, y, player));
         barrelCount++;
         setLocation(x, y);
@@ -78,12 +76,21 @@ int StudentWorld::init()
     }
     return GWSTATUS_CONTINUE_GAME;
 }
-bool StudentWorld::hasSomething(int xPos, int yPos) {
+
+// This function checks if there is an actor (not tunnelman) something at the x, y coordinate
+// It loops through actor pointers and checks if it has an overlapping coordinate
+// Designed to take an x & y position from tunnelman, so it checks if anything in the 4x4 square of the actor matches the 4x4 square of the tunnelman
+bool StudentWorld::hasSomething(int xPos, int yPos, string& type) {
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
+    
     while (it!=actorPtrs.end()) {
-        if ((*it)->isCoordinate(xPos, yPos)) {
-            return true;
+        for (int i = xPos; i <= xPos +3; i ++) {
+            for (int k = yPos; k <= yPos +3; k++) {
+                if ((*it)->isCoordinate(i, k)) {
+                    return true;
+                }
+            }
         }
         
         it++;
@@ -138,8 +145,23 @@ int StudentWorld::move()
     // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
     //
     if (barrelCount == 0) {
-        advanceToNextLevel();
-        return GWSTATUS_FINISHED_LEVEL;
+        vector<Actor*>::iterator it;
+                it = actorPtrs.begin();
+                    // delete boulders at end of the level
+                while (it != actorPtrs.end()) {
+
+                    if((*it)->getID() == TID_BOULDER){
+                        delete (*it);
+                        it = actorPtrs.erase(it);
+                    }
+
+                    /*if ((*it)->getID() == TID_BARREL) {
+                        delete (*it);
+                        it = actorPtrs.erase(it);
+                    }*/
+                }
+                //advanceToNextLevel();
+                return GWSTATUS_FINISHED_LEVEL;
     }
 //    tick++;
     
@@ -152,7 +174,6 @@ int StudentWorld::move()
     it = actorPtrs.begin();
     while (it != actorPtrs.end()) {
         (*it)->doSomething();
-       
         it++;
     }
     
@@ -160,7 +181,7 @@ int StudentWorld::move()
     // Loop through actors and remove dead ones
     it = actorPtrs.begin();
     while (it != actorPtrs.end()) {
-       
+
         if (!(*it)->isAlive()) {
            delete (*it);
            it = actorPtrs.erase(it);
@@ -185,6 +206,14 @@ void StudentWorld::cleanUp()
             delete earthPtrs[x][y];
         }
     }
+    // TODO: check how to delete the rest of the pointers for cleanup lol
+//    vector<Actor*>::iterator it;
+//    it = actorPtrs.begin();
+//    while (it != actorPtrs.end()) {
+//        delete (*it);
+//        it = actorPtrs.erase(it);
+//        it ++;
+//    }
 }
 
 // Students:  Add code to this file (if you wish), StudentWorld.h, Actor.h and Actor.cpp
