@@ -18,7 +18,7 @@ public:
     virtual void doSomething() = 0;
     bool isAlive();
     void setDead();
-    
+    bool isCoordinate(int otherX, int otherY);
 
 private:
     StudentWorld* m_world;
@@ -103,5 +103,11 @@ private:
     Tunnelman* playerInGame;
 };
 
+class Protestor : public Actor {
+public:
+    Protestor(StudentWorld* sw, int startX, int startY, Tunnelman* p);
+    ~Protestor();
+    
+};
 
 #endif // ACTOR_H_

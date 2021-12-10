@@ -9,6 +9,7 @@ class GraphObject;
 class Earth;
 class Tunnelman;
 class Actor;
+class Boulder;
 /// Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
 class StudentWorld : public GameWorld
@@ -24,6 +25,7 @@ public:
     void setLocation(int xPos, int yPos);
     void setDisplayText();
     void decrementBarrelCount();
+    bool hasSomething(int xPos, int yPos);
 
     virtual int move();
 

@@ -75,6 +75,19 @@ Boulder::Boulder(StudentWorld* sw, int startX, int startY) : Actor(sw, TID_BOULD
 Boulder::~Boulder() {
 }
 
+bool Actor::isCoordinate(int otherX, int otherY) {
+    int x = getX();
+    int y = getY();
+    for (int k = x; k <= x +3; k++) {
+        for (int j = y; j <= y+3; j++) {
+            if (k == otherX && j == otherY) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void Boulder::setState(string state) {
     m_state = state;
 }
@@ -181,6 +194,8 @@ void Barrel::setState(string state) {
 void Tunnelman::doSomething() {
 
     int ch;
+    int x = getX();
+    int y = getY();
 
     if (getWorld()->getKey(ch) == true)
     {
@@ -192,8 +207,10 @@ void Tunnelman::doSomething() {
                 this->setDirection(left);
                 break;
             }
-            if (getX() != 0) {
-                moveTo(getX() - 1, getY());
+            if (x != 0) {
+                if (!getWorld()->hasSomething(x-1, y)) {
+                    moveTo(x - 1, y);
+                }
             }
 
             break;
@@ -202,13 +219,10 @@ void Tunnelman::doSomething() {
                 this->setDirection(right);
                 break;
             }
-            if (getX() != 60) {
-                moveTo(getX() + 1, getY());
-                //                if (m_world->isthereEarth(getX()+1, getY())) {
-                //                    m_world->digField(getX()+1, getY());
-                //                    m_world->digField(getX()+2, getY());
-                //                    m_world->playSound(SOUND_DIG);
-                //                }
+            if (x != 60) {
+                if (!getWorld()->hasSomething(x+4, y)) {
+                    moveTo(x + 1, y);
+                }
             }
             break;
         case KEY_PRESS_UP:
@@ -217,12 +231,10 @@ void Tunnelman::doSomething() {
                 break;
             }
 
-            if (getY() != 60) {
-                moveTo(getX(), getY() + 1);
-                //                if (m_world->isthereEarth(getX(), getY())) {
-                //                    m_world->digField(getX(), getY());
-                //                    m_world->playSound(SOUND_DIG);
-                //                }
+            if (y != 60) {
+                if (!getWorld()->hasSomething(x, y+1)) {
+                    moveTo(x, y + 1);
+                }
             }
 
             break;
@@ -231,12 +243,10 @@ void Tunnelman::doSomething() {
                 this->setDirection(down);
                 break;
             }
-            if (getY() != 0) {
-                moveTo(getX(), getY() - 1);
-                //                if (m_world->isthereEarth(getX(), getY())) {
-                //                    m_world->digField(getX(), getY());
-                //                    m_world->playSound(SOUND_DIG);
-                //                }
+            if (y != 0) {
+                if (!getWorld()->hasSomething(x, y-1)) {
+                    moveTo(x, y - 1);
+                }
             }
             break;
         case KEY_PRESS_SPACE:

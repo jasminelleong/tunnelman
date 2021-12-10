@@ -78,6 +78,20 @@ int StudentWorld::init()
     }
     return GWSTATUS_CONTINUE_GAME;
 }
+bool StudentWorld::hasSomething(int xPos, int yPos) {
+    vector<Actor*>::iterator it;
+    it = actorPtrs.begin();
+    while (it!=actorPtrs.end()) {
+        if ((*it)->isCoordinate(xPos, yPos)) {
+            return true;
+        }
+        
+        it++;
+    }
+    
+
+    return false;
+}
 void StudentWorld::setLocation(int xPos, int yPos) {
     for (int k = xPos; k <= xPos + 5 && (k >= 0 && k < VIEW_WIDTH); k++) {
         for (int j = yPos; j <= yPos + 5 && (j >= 0 && j < VIEW_HEIGHT); j++) {
@@ -89,40 +103,20 @@ void StudentWorld::setLocation(int xPos, int yPos) {
 
 bool StudentWorld::isBoulderthere(int xPos, int yPos) {
     
+    // xPos & yPos is related to the tunnelman :(
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
-    while (it != actorPtrs.end()) {
-        if ((*it)->getX() == xPos && (*it)->getY() == yPos) {
-            return true;
+    for (int k = xPos; k <= xPos + 3 && (k >= 0 && k < VIEW_WIDTH); k++) {
+        for (int j = yPos; j <= yPos + 3 && (j >= 0 && j < VIEW_HEIGHT); j++) {
+            while (it != actorPtrs.end()) {
+                if ((*it)->getX() == k && (*it)->getY() == j) {
+                    return true;
+                }
+                it++;
+            }
         }
-        it++;
     }
     return false;
-    
-//
-//    for (int k = xPos; k <= xPos + 5 && (k >= 0 && k < VIEW_WIDTH); k++) {
-//        for (int j = yPos; j <= yPos + 5 && (j >= 0 && j < VIEW_HEIGHT); j++) {
-//            if (BoulderPtrs[k][j] == true) {
-//                return true;
-//            }
-//
-//        }
-//    }
-//    for (int k = xPos; k <= xPos - 5 && (k >= 0 && k < VIEW_WIDTH); k--) {
-//        for (int j = yPos; j <= yPos - 5 && (j >= 0 && j < VIEW_HEIGHT); j--) {
-//            if (BoulderPtrs[k][j] == true) {
-//                return true;
-//            }
-//
-//        }
-//    }
-    return false;
-   /* if (BoulderPtrs[xPos][yPos] == true) {
-        return false;
-    }
-    return true;*/
-    //Trying to make squares into a 2D array, and turn the values into the arguments
-    //into the the x,y coordinates
 
 }
 void StudentWorld::setDisplayText() {
