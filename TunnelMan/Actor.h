@@ -10,23 +10,24 @@ const std::string falling = "falling";
 const std::string temp = "temp";
 
 /// Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
-
+//template <typename Object>
+//Object isCoordinate(int otherX, int otherY) {
+//
+//}
 class Actor : public GraphObject {
 public:
     Actor(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth);
+    //Actor(StudentWorld* sw, int imageID, int startX, int startY, double size, unsigned int depth);
     ~Actor();
     StudentWorld* getWorld();
     virtual void doSomething() = 0;
     bool isAlive();
     void setDead();
-    
-    bool isCoordinate(int otherX, int otherY, std::string& type);
+    bool isCoordinate(int otherX, int otherY);
     virtual std::string classType() = 0;
 
 private:
     StudentWorld* m_world;
-    int x;
-    int y;
     bool m_isAlive;
 };
 
@@ -43,27 +44,27 @@ class Tunnelman : public Actor {
 public:
     Tunnelman(StudentWorld* sw);
     void doSomething();
-    void getLocation();
     ~Tunnelman();
     std::string classType();
-//    bool isCoordinate(int otherX, int otherY, std::string& type);
-
+    void increaseSonarCount();
     int hp() const;
     int numWater() const;
     int numSonar() const;
     int numGold() const;
     void increaseSquirts(unsigned int howMuch);
     void decreaseSquirts();
-    int SquirtCount();
-    void increaseSonarCount();
+    void increaseGold();
+    void decreaseGold();
+    void decrementHealth(int howMuch);
 
 private:
     int m_hp;
     int m_waterUnits;
     int m_numSonar;
     int m_numGold;
-//    int x;
-//    int y;
+    int x;
+    int y;
+    bool m_isAlive = true;
 
 
 };
@@ -78,7 +79,6 @@ public:
     }
     void setState(std::string state);
     std::string classType();
-    bool isCoordinate(int xPos, int yPos, std::string& type);
 
 private:
     std::string m_state;
@@ -89,51 +89,6 @@ private:
 
 };
 
-
-// Base class for pick-uppable items: Sonar kits, Water, Gold nuggets
-class Goodies : public Actor {
-public:
-    Goodies(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth);
-    ~Goodies();
-private:
-
-};
-
-class Barrel : public Goodies {
-public:
-    Barrel(StudentWorld* sw, int startX, int startY, Tunnelman* p);
-    ~Barrel();
-    void doSomething();
-    bool isCoordinate(int otherX, int otherY, std::string& type);
-    void setState(std::string state);
-    void makeVisible();
-    std::string classType();
-   
-private:
-    std::string m_state;
-//    int m_x;
-//    int m_y;
-    bool found;
-    int count;
-    Tunnelman* playerInGame;
-};
-
-class Protester : public Actor {
-public:
-    Protester(StudentWorld* sw, int startX, int startY);
-    ~Protester();
-    void doSomething();
-    std::string classType();
-    void move();
-    bool isCoordinate(int otherX, int otherY, std::string &type);
-private:
-    
-    int waitingNum;
-    int numSquaresToMoveInCurrentDirection;
-    int m_hp;
-    bool isLeaveFieldState;
-    
-};
 class Squirt : public Actor {
 public:
     Squirt(StudentWorld* sw, int startX, int startY, Tunnelman* p, Direction d);
@@ -154,6 +109,80 @@ private:
     Direction dir;
 
 };
+
+class Protester : public Actor {
+public:
+    Protester(StudentWorld* sw, int startX, int startY, Tunnelman* p);
+    ~Protester();
+    void doSomething();
+    std::string classType();
+    void move();
+    bool isCoordinate(int otherX, int otherY, std::string& type);
+    bool isNearTunnelman();
+    bool isFacingTunnelman();
+    void setNewDirection();
+private:
+    int yellWaitingNum;
+    int perpendicularRestingNum;
+    int waitingNum;
+    int numSquaresToMoveInCurrentDirection;
+    int m_hp;
+    bool isLeaveFieldState;
+    Tunnelman* playerInGame;
+
+};
+
+
+
+
+// Base class for pick-uppable items: Sonar kits, Water, Gold nuggets
+class Goodies : public Actor {
+public:
+    Goodies(StudentWorld* sw, int imageID, int startX, int startY, Direction dir, double size, unsigned int depth, Tunnelman* p);
+    ~Goodies();
+    bool isNearTunnelman();
+private:
+    Tunnelman* playerInGame;
+};
+/**/
+class Nuggets : public Goodies {
+public:
+    Nuggets(StudentWorld* sw, int startX, int startY, Tunnelman* p, std::string state);
+    ~Nuggets();
+    void doSomething();
+  
+    std::string classType();
+    // void setState(std::string state);
+ // void makeVisible();
+
+private:
+    std::string m_state;
+    int m_x;
+    int m_y;
+    bool found;
+    int count;
+    int waitingNum;
+    Tunnelman* playerInGame;
+};
+/**/
+class Barrel : public Goodies {
+public:
+    Barrel(StudentWorld* sw, int startX, int startY, Tunnelman* p);
+    ~Barrel();
+    void doSomething();
+    void setState(std::string state);
+    void makeVisible();
+    std::string classType();
+
+private:
+    std::string m_state;
+    int m_x;
+    int m_y;
+    bool found;
+    int count;
+    Tunnelman* playerInGame;
+};
+
 class WaterPool : public Goodies {
 public:
     WaterPool(StudentWorld* sw, int startX, int startY, Tunnelman* p);
@@ -162,9 +191,6 @@ public:
     void doSomething();
     std::string classType();
     std::string getID();
-    bool isCoordinate(int otherX, int otherY, std::string &type);
-    
-    
 private:
     std::string m_state;
     int m_x;
@@ -182,7 +208,6 @@ public:
     void doSomething();
     std::string classType();
     std::string getID();
-    bool isCoordinate(int otherX, int otherY, std::string &type);
 private:
     std::string m_state;
     int m_x;
@@ -190,5 +215,8 @@ private:
     int waitingNum;
     Tunnelman* playerInGame;
 };
+
+
+
 
 #endif // ACTOR_H_
