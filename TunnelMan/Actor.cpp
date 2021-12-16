@@ -24,7 +24,7 @@ Protester::Protester(StudentWorld* sw, int startX, int startY, Tunnelman* p) : A
     m_hp = 5;
     numSquaresToMoveInCurrentDirection = rand() % (60 - 8 + 1) + 8;
     isLeaveFieldState = false;
-    waitingNum = 3;
+    waitingNum = std::max(0, 3-(static_cast<int>(getWorld()->getLevel())/4));
     playerInGame = p;
     yellWaitingNum = 15;
     perpendicularRestingNum = 200;
@@ -32,6 +32,9 @@ Protester::Protester(StudentWorld* sw, int startX, int startY, Tunnelman* p) : A
 
 Protester::~Protester() {
 
+}
+void Protester::decrementHealth(int howMuch) {
+    m_hp = m_hp - howMuch;
 }
 bool Protester::isNearTunnelman() {
     int x = playerInGame->getX();
@@ -74,6 +77,72 @@ bool Protester::isFacingTunnelman() {
 string Protester::classType() {
     return protester;
 }
+bool Protester::takePerpendicularTurn() {
+    Direction dir = getDirection();
+    int x = getX();
+    int y = getY();
+    if (dir == left || dir == right) {
+        bool canMoveUp = false;
+        bool canMoveDown = false;
+        if (!getWorld()->isBoulderOrEarth(x, y-1) && y !=0) {
+            canMoveDown = true;
+        }
+        if (!getWorld()->isBoulderOrEarth(x, y+1) && y !=60) {
+            canMoveUp = true;
+        }
+        if (canMoveUp && canMoveDown) {
+            int prob = rand() % 1;
+            if (prob == 0) {
+                setDirection(up);
+                return true;
+                
+            }
+            else {
+                setDirection(down);
+                return true;
+            }
+        }
+        if (canMoveUp) {
+            setDirection(up);
+            return true;
+        }
+        if (canMoveDown) {
+            setDirection(down);
+            return true;
+        }
+    }
+    if (dir == up || dir == down) {
+        bool canMoveLeft = false;
+        bool canMoveRight = false;
+        if (!getWorld()->isBoulderOrEarth(x-1, y) && x!=0) {
+            canMoveLeft = true;
+        }
+        if (!getWorld()->isBoulderOrEarth(x+1, y) && x!=60) {
+            canMoveRight = true;
+        }
+        if (canMoveLeft && canMoveRight) {
+            int prob = rand() % 1;
+            if (prob == 0) {
+                setDirection(left);
+                return true;
+                
+            }
+            else {
+                setDirection(right);
+                return true;
+            }
+        }
+        if (canMoveLeft) {
+            setDirection(left);
+            return true;
+        }
+        if (canMoveRight) {
+            setDirection(right);
+            return true;
+        }
+    }
+    return false;
+}
 void Protester::move() {
     int x = getX();
     int y = getY();
@@ -87,59 +156,51 @@ void Protester::move() {
         }
         
     }
+//    bool tookTurn = false;
+    
+    
     if (direction == left) {
         if (x != 0) {
-            if (!getWorld()->isthereEarth(x - 1, y) && !getWorld()->isBoulderthere(x-1, y)) {
-//                if (!getWorld()->whatsAtThisLocation(x - 1, y)) {
-                    //                    if (type != boulder) {
+            if (!getWorld()->isBoulderOrEarth(x-1, y)) {
                     moveTo(x - 1, y);
-                    //                    }
                 }
-//                else if (type == protester) {
-//                    moveTo(x - 1, y);
-//                }
-//            }
+            else {
+                numSquaresToMoveInCurrentDirection = 0;
+                setNewDirection();
+            }
         }
     }
     if (direction == right) {
         if (x != 60) {
-            if (!getWorld()->isthereEarth(x + 1, y) && !getWorld()->isBoulderthere(x+1, y)) {
-//                if (!getWorld()->whatsAtThisLocation(x + 1, y)) {
-                    //                    if (type != boulder) {
+            if (!getWorld()->isBoulderOrEarth(x+1, y)) {
                     moveTo(x + 1, y);
-                    //                    }
-//                }
-//                else if (type == protester) {
-//                    moveTo(x + 1, y);
-//                }
+            }
+            else {
+                numSquaresToMoveInCurrentDirection = 0;
+                setNewDirection();
             }
         }
     }
     if (direction == up) {
         if (y != 60) {
-            if (!getWorld()->isthereEarth(x, y + 1) && !getWorld()->isBoulderthere(x, y+1)) {
-//                if (!getWorld()->whatsAtThisLocation(x, y + 1)) {
-                    //                    if (type != boulder) {
+            if (!getWorld()->isBoulderOrEarth(x, y+1)) {
                     moveTo(x, y + 1);
-                    //                    }
-//                }
-//                else if (type == protester) {
-//                    moveTo(x, y + 1);
-//                }
+            }
+            else {
+                numSquaresToMoveInCurrentDirection = 0;
+                setNewDirection();
             }
         }
     }
     if (direction == down) {
         if (y != 0) {
-            if (!getWorld()->isthereEarth(x, y - 1) && !getWorld()->isBoulderthere(x, y-1)) {
-//                if (!getWorld()->whatsAtThisLocation(x, y - 1)) {
-                    //                    if (type != boulder) {
+            if (!getWorld()->isBoulderOrEarth(x, y-1)) {
                     moveTo(x, y - 1);
-                    //                    }
-//                }
-//                else if (type == protester) {
-//                    moveTo(x, y - 1);
-//                }
+//
+            }
+            else {
+                numSquaresToMoveInCurrentDirection = 0;
+                setNewDirection();
             }
         }
     }
@@ -154,6 +215,7 @@ void Protester::setNewDirection() {
     int dir;
     string type = "";
     bool foundNewDir = false;
+    // Keep looking for new directions to go if there is earth or boulder blocking the way
     while (!foundNewDir) {
         dir = rand() % 4;
         if (dir == 0) {
@@ -190,6 +252,30 @@ void Protester::doSomething() {
     if (!isAlive()) {
         return;
     }
+    if (m_hp <=0) {
+        isLeaveFieldState = true;
+    }
+    if (isLeaveFieldState) {
+        int x  = getX();
+        int y = getY();
+        if (x ==60 && y ==60) {
+            setDead();
+            return;
+        }
+        else {
+            if (!getWorld()->isBoulderOrEarth(x+1, y)) {
+                setDirection(right);
+                moveTo(x+1,y);
+            }
+            else if (!getWorld()->isBoulderthere(x, y+1)) {
+                setDirection(up);
+                moveTo(x,y+1);
+            }
+            else (takePerpendicularTurn());
+            
+        }
+    }
+    else {
 //    int x = getX();
 //    int y = getY();
     // resting state
@@ -211,6 +297,12 @@ void Protester::doSomething() {
         //            // find a way to quickly exit
         //        }q
         //        else {
+        if (perpendicularRestingNum ==0) {
+            if (takePerpendicularTurn()) {
+                numSquaresToMoveInCurrentDirection = rand() % (60 - 8 + 1) + 8;
+                perpendicularRestingNum = 200;
+            }
+        }
         move();
         
         
@@ -227,9 +319,17 @@ void Protester::doSomething() {
         // ELSE (can't see tunnelman) {
             // decrement numSquares to move
         // if numSquares to move == 0 {
-
+    }
     }
     //    }
+}
+////HARDCORE PROTESTER CLASS
+
+HardcoreProtester::HardcoreProtester(StudentWorld* sw, int startX, int startY, Tunnelman* p) : Protester(sw, startX, startY, p){
+    
+}
+HardcoreProtester::~HardcoreProtester() {
+    
 }
 
 
@@ -244,9 +344,9 @@ SonarKit::SonarKit(StudentWorld* sw, int startX, int startY, Tunnelman* p) : Goo
     waitingNum = std::max(100, 300 - 10 * (static_cast<int>(getWorld()->getLevel())));
 
 }
-void SonarKit::setState(std::string state) {
-    m_state = state;
-}
+//void SonarKit::setState(std::string state) {
+//    m_state = state;
+//}
 void SonarKit::doSomething() {
     int x = playerInGame->getX();
     int y = playerInGame->getY();
@@ -333,7 +433,7 @@ string Earth::classType() {
 
 Tunnelman::Tunnelman(StudentWorld* sw) : Actor(sw, TID_PLAYER, 30, 60, right, 1, 0) {
     setVisible(true);
-    m_hp = 10;
+    m_hp = 100;
     m_waterUnits = 5;
     m_numSonar = 1;
     m_numGold = 0;
@@ -569,6 +669,9 @@ void Boulder::doSomething() {
                 //getWorld()->returnDeadplayer(); // here
             }
         }
+//        if (getWorld()->isProtesterThere(x, y)) {
+//
+//        }
         if (!getWorld()->isthereEarth(x, y - 1)) {
             moveTo(x, y - 1);
         }
@@ -710,15 +813,15 @@ void Barrel::doSomething() {
     }
 
 }
-void Barrel::makeVisible() {
-    found = true;
-
-}
+//void Barrel::makeVisible() {
+//    found = true;
+//
+//}
 Barrel::~Barrel() {
 }
-void Barrel::setState(string state) {
-    m_state = state;
-}
+//void Barrel::setState(string state) {
+//    m_state = state;
+//}
 
 ///SQUIRTS CLASS///
 Squirt::Squirt(StudentWorld* sw, int startX, int startY, Tunnelman* p,Direction d) : Actor(sw, TID_WATER_SPURT, startX, startY,dir, 1, 1) {
@@ -760,8 +863,9 @@ void Squirt::doSomething() {
                     setDead();
                     waitingNum = 0;
                 }
-                if (getWorld()->protestorLocator(x + 1, y) == true) {
+                if (getWorld()->protesterLocator(x + 1, y) == true) {
                     setDead();
+                    
                     waitingNum = 0;
                 }
                 else {
@@ -780,7 +884,7 @@ void Squirt::doSomething() {
                     setDead();
                     waitingNum = 0;
                 }
-                if (getWorld()->protestorLocator(x-1, y) == true) {
+                if (getWorld()->protesterLocator(x-1, y) == true) {
                     setDead();
                     waitingNum = 0;
                 }
@@ -799,10 +903,10 @@ void Squirt::doSomething() {
                     setDead();
                     waitingNum = 0;
                 }
-                /*if (getWorld()->protestorLocator(x, y+1) == true) {
+                if (getWorld()->protesterLocator(x, y+1) == true) {
                     setDead();
                     waitingNum = 0;
-                }*/
+                }
                 else {
                     yu++;
                     moveTo(x, yu + 1);
@@ -818,10 +922,10 @@ void Squirt::doSomething() {
                     setDead();
                     waitingNum = 0;
                 }
-                /*if (getWorld()->protestorLocator(x, y-1) == true) {
+                if (getWorld()->protesterLocator(x, y-1) == true) {
                     setDead();
                     waitingNum = 0;
-                }*/
+                }
                 else {
                     yd--;
                     moveTo(x, yd - 1);
@@ -847,9 +951,9 @@ WaterPool::WaterPool(StudentWorld* sw, int startX, int startY, Tunnelman* p) : G
      waitingNum = std::max(100, 300 - 10 * (static_cast<int>(getWorld()->getLevel())));
  
 }
-void WaterPool::setState(std::string state) {
-    m_state = state;
-}
+//void WaterPool::setState(std::string state) {
+//    m_state = state;
+//}
 void WaterPool::doSomething() {
     int x = playerInGame->getX();
     int y = playerInGame->getY();

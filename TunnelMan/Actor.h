@@ -117,18 +117,28 @@ public:
     void doSomething();
     std::string classType();
     void move();
-    bool isCoordinate(int otherX, int otherY, std::string& type);
+//    bool isCoordinate(int otherX, int otherY, std::string& type);
     bool isNearTunnelman();
     bool isFacingTunnelman();
     void setNewDirection();
+    bool takePerpendicularTurn();
+    void decrementHealth(int howMuch);
 private:
     int yellWaitingNum;
-    int perpendicularRestingNum;
+    int perpendicularRestingNum =200;
     int waitingNum;
     int numSquaresToMoveInCurrentDirection;
     int m_hp;
     bool isLeaveFieldState;
     Tunnelman* playerInGame;
+
+};
+
+class HardcoreProtester : public Protester {
+public:
+    HardcoreProtester(StudentWorld* sw, int startX, int startY, Tunnelman* p);
+    ~HardcoreProtester();
+private:
 
 };
 
@@ -170,12 +180,12 @@ public:
     Barrel(StudentWorld* sw, int startX, int startY, Tunnelman* p);
     ~Barrel();
     void doSomething();
-    void setState(std::string state);
-    void makeVisible();
+//    void setState(std::string state);
+//    void makeVisible();
     std::string classType();
 
 private:
-    std::string m_state;
+//    std::string m_state;
     int m_x;
     int m_y;
     bool found;
@@ -187,7 +197,6 @@ class WaterPool : public Goodies {
 public:
     WaterPool(StudentWorld* sw, int startX, int startY, Tunnelman* p);
     ~WaterPool();
-    void setState(std::string state);
     void doSomething();
     std::string classType();
     std::string getID();
@@ -204,10 +213,11 @@ class SonarKit : public Goodies {
 public:
     SonarKit(StudentWorld* sw, int startX, int startY, Tunnelman* p);
     ~SonarKit();
-    void setState(std::string state);
+//    void setState(std::string state);
     void doSomething();
     std::string classType();
     std::string getID();
+    bool isWithinRadius(int);
 private:
     std::string m_state;
     int m_x;

@@ -127,8 +127,8 @@ void StudentWorld::populatePoolsOrSonar() {
 //}
 void StudentWorld::populateNuggets() {
     std::string type = "";
-    int tempGold = 0;
-    int permGold = 0;
+//    int tempGold = 0;
+//    int permGold = 0;
     int N = (static_cast<int>(getLevel())) / 2;
     int G = std::max(5 - N, 2);
     //if (G % 2 == 0) {
@@ -149,7 +149,7 @@ void StudentWorld::populateNuggets() {
             y = rand() % (57 - 20 + 1) + 20;
         } while (hasSomething(x, y, type));
         actorPtrs.push_back(new Nuggets(this, x, y, player,perm));
-        setLocation(x, y);
+//        setLocation(x, y);
 //        digField(x, y);
     }
 }
@@ -164,6 +164,7 @@ int StudentWorld::init()
     populateBarrels();
     populateNuggets();
     tick = 0;
+    timeSinceLastProtester = 0;
   
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -212,15 +213,15 @@ bool StudentWorld::hasSomething(int xPos, int yPos, string& type) {
     }
     return false;
 }
-void StudentWorld::setLocation(int xPos, int yPos) {
-    for (int k = xPos; k <= xPos + 5 && (k >= 0 && k < VIEW_WIDTH); k++) {
-        for (int j = yPos; j <= yPos + 5 && (j >= 0 && j < VIEW_HEIGHT); j++) {
-            BoulderPtrs[xPos][yPos] = true;
-        }
-    }
-
-}
-bool StudentWorld::protestorLocator(int x, int y) {
+//void StudentWorld::setLocation(int xPos, int yPos) {
+//    for (int k = xPos; k <= xPos + 5 && (k >= 0 && k < VIEW_WIDTH); k++) {
+//        for (int j = yPos; j <= yPos + 5 && (j >= 0 && j < VIEW_HEIGHT); j++) {
+//            BoulderPtrs[xPos][yPos] = true;
+//        }
+//    }
+//
+//}
+bool StudentWorld::protesterLocator(int x, int y) {
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
 
@@ -233,7 +234,7 @@ bool StudentWorld::protestorLocator(int x, int y) {
             for (int k = X; k <= X + 3; k++) {
                 for (int j = Y; j <= Y + 3; j++) {
                     if (k == x && j == y) {
-
+                        static_cast<Protester*>((*it))->decrementHealth(2);
                         return true;
                     }
                 }
@@ -246,6 +247,12 @@ bool StudentWorld::protestorLocator(int x, int y) {
     }
     return true;
     
+}
+bool StudentWorld::isBoulderOrEarth(int x, int y) {
+    if (isBoulderthere(x, y) || isthereEarth(x, y)) {
+        return true;
+    }
+    return false;
 }
 
 
@@ -269,7 +276,19 @@ int StudentWorld::move()
    
     if (tick == 1) {
         //TODO: where is he actually supposed to appear not sure
-        actorPtrs.push_back(new Protester(this, 25, 60, player));
+        actorPtrs.push_back(new Protester(this, 30, 40, player));
+        numProtesters++;
+    }
+    if (timeSinceLastProtester == std::max(25, 200- static_cast<int>(getLevel()))) {
+        int level = static_cast<int>(getLevel());
+//        int P = min(15, (2 + (level * 1.5)));'
+        int a = 2 + level*1.5;
+        int i = std::min(15, a);
+        if (numProtesters < i) {
+            actorPtrs.push_back(new Protester(this, 25, 60, player));
+            numProtesters++;
+        }
+        timeSinceLastProtester = 0;
     }
     /// This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
     // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
@@ -343,6 +362,9 @@ int StudentWorld::move()
     while (it != actorPtrs.end()) {
 
         if (!(*it)->isAlive()) {
+            if ((*it)->getID() == TID_PROTESTER || (*it)->getID() == TID_HARD_CORE_PROTESTER) {
+                numProtesters--;
+            }
             delete (*it);
             it = actorPtrs.erase(it);
         }
@@ -350,7 +372,7 @@ int StudentWorld::move()
             it++;
         }
     }
-    
+    timeSinceLastProtester++;
     return GWSTATUS_CONTINUE_GAME;
     // return barrelCount;
 }
@@ -410,21 +432,73 @@ bool StudentWorld::isBoulderthere(int xPos, int yPos) {
     // xPos & yPos is related to the tunnelman :(
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
-    for (int k = xPos; k <= xPos + 3 && (k >= 0 && k < VIEW_WIDTH); k++) {
-        for (int j = yPos; j <= yPos + 3 && (j >= 0 && j < VIEW_HEIGHT); j++) {
-            while (it != actorPtrs.end()) {
-                if ((*it)->getX() == k && (*it)->getY() == j) {
-                    return true;
+    while (it!= actorPtrs.end()) {
+        if ((*it)->getID() == TID_BOULDER) {
+            for (int k = xPos; k <= xPos + 3 && (k >= 0 && k < VIEW_WIDTH); k++) {
+                for (int j = yPos; j <= yPos + 3 && (j >= 0 && j < VIEW_HEIGHT); j++) {
+                    //                if ((*it)->getX() == k && (*it)->getY() == j) {
+                    //                    if ((*it)->getID() == TID_BOULDER) {
+                    if ((*it)->isCoordinate(k,j)) {
+                        return true;
+                    }
                 }
-                it++;
             }
+            
         }
+        it++;
     }
+    
     return false;
-
 }
+    
+    //    vector<Actor*>::iterator it;
+//    it = actorPtrs.begin();
+//
+//    while (it != actorPtrs.end()) {
+//        for (int i = xPos; i <= xPos + 3; i++) {
+//            for (int k = yPos; k <= yPos + 3; k++) {
+//                if ((*it)->getID() == TID_WATER_POOL) {
+//                    return false;
+//                }
+//                if ((*it)->getID() == TID_BARREL) {
+//                    return false;
+//                }
+//
+//                if ((*it)->isCoordinate(i, k)) {
+//                    return true;
+//                }
+//            }
+//        }
+//
+//        it++;
+//    }
+//    return false;
+
+//}
 void StudentWorld::decrementBarrelCount() {
     if (barrelCount != 0) {
         barrelCount--;
     }
 }
+//bool StudentWorld::isProtesterThere(int x, int y) {
+//    vector<Actor*>::iterator it = actorPtrs.begin();
+//    while (it!= actorPtrs.end()) {
+//        if ((*it)->getID() == TID_PROTESTER || (*it)->getID() == TID_HARD_CORE_PROTESTER) {
+//            int xP = (*it)->getX();
+//            int yP = (*it)->getY();
+//            int XL = xP - 3;
+//            int XR = xP + 3;
+//            int YL = yP - 3;
+//            int YR = yP + 3;
+//            if (XL <= x && x <= XR){
+//                if (YL <= y && y <= YR) {
+//                    return true;
+//                    (*it)->setDead();
+//                    //getWorld()->returnDeadplayer(); // here
+//                }
+//            }
+//        }
+//        it++;
+//    }
+//    return false;
+//}
