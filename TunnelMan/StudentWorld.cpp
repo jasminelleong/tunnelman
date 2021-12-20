@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <math.h>
 using namespace std;
 
 const string earth = "earth";
@@ -29,7 +30,32 @@ StudentWorld::~StudentWorld() {
 void StudentWorld::shoot(int x, int y) {
     m_shoot = true;
 }
-
+int StudentWorld::annoyCount() {
+    return annoy;
+}
+void StudentWorld::resetAnnoy() {
+    annoy = 5;
+}
+void StudentWorld::annoyance() { // for reg protestor
+    if (annoy == 0) {
+        stun = true;
+        return;
+    }
+    annoy--;
+}
+void StudentWorld::SetStun() {
+    stun = true;
+    return;
+}
+void StudentWorld::resetStun() {
+    stun = false;
+}
+bool StudentWorld::stunned() {
+    if (stun == true) {
+        return true;
+    }
+    return false;
+}
 void StudentWorld::returnDeadplayer() {
     m_restart = true;
 }
@@ -66,7 +92,7 @@ void StudentWorld::populateBoulders() {
         } while (hasSomething(x, y, type));
 
         actorPtrs.push_back(new Boulder(this, x, y, player));
-//        setLocation(x, y);
+        //        setLocation(x, y);
         digField(x, y);
     }
 }
@@ -85,8 +111,8 @@ void StudentWorld::populateBarrels() {
         } while (hasSomething(x, y, type));
         actorPtrs.push_back(new Barrel(this, x, y, player));
         barrelCount++;
-//        setLocation(x, y);
-        digField(x, y);
+        //        setLocation(x, y);
+//        digField(x, y); // DELETE THIS
     }
 }
 void StudentWorld::populatePoolsOrSonar() {
@@ -127,8 +153,8 @@ void StudentWorld::populatePoolsOrSonar() {
 //}
 void StudentWorld::populateNuggets() {
     std::string type = "";
-//    int tempGold = 0;
-//    int permGold = 0;
+    //    int tempGold = 0;
+    //    int permGold = 0;
     int N = (static_cast<int>(getLevel())) / 2;
     int G = std::max(5 - N, 2);
     //if (G % 2 == 0) {
@@ -148,13 +174,13 @@ void StudentWorld::populateNuggets() {
             } while (x >= 28 && x <= 35);
             y = rand() % (57 - 20 + 1) + 20;
         } while (hasSomething(x, y, type));
-        actorPtrs.push_back(new Nuggets(this, x, y, player,perm));
-//        setLocation(x, y);
-//        digField(x, y);
+        actorPtrs.push_back(new Nuggets(this, x, y, player, perm));
+        //        setLocation(x, y);
+        //        digField(x, y);
     }
 }
 void StudentWorld::dropGold() {
-    actorPtrs.push_back(new Nuggets(this, player->getX(), player->getY(), player,temp));
+    actorPtrs.push_back(new Nuggets(this, player->getX(), player->getY(), player, temp));
 }
 int StudentWorld::init()
 {
@@ -165,7 +191,7 @@ int StudentWorld::init()
     populateNuggets();
     tick = 0;
     timeSinceLastProtester = 0;
-  
+
     return GWSTATUS_CONTINUE_GAME;
 }
 //could this be specific to tunnelmans walking , like he can walk and collect barrels and pools and sonar
@@ -182,7 +208,7 @@ bool StudentWorld::whatsAtThisLocation(int xPos, int yPos) {
                 if ((*it)->getID() == TID_BARREL) {
                     return false;
                 }
-                
+
                 if ((*it)->isCoordinate(i, k)) {
                     return true;
                 }
@@ -246,7 +272,7 @@ bool StudentWorld::protesterLocator(int x, int y) {
         it++;
     }
     return true;
-    
+
 }
 bool StudentWorld::isBoulderOrEarth(int x, int y) {
     if (isBoulderthere(x, y) || isthereEarth(x, y)) {
@@ -266,33 +292,40 @@ void StudentWorld::setDisplayText() {
     int sonar = player->numSonar();
     int score = getScore();
     string s;
-    s = "Time: " + std::to_string(tick) + " Lvl: " + std::to_string(level) + " Lives: " + std::to_string(lives) + " Hlth: " + std::to_string(10*health) + "% Wtr: " + std::to_string(squirts) + " Gld: " + std::to_string(gold) + " Oil Left: " + std::to_string(barrelsLeft) + " Sonar: " + std::to_string(sonar) + " Scr: " + std::to_string(score);
+    s = " Lvl: " + std::to_string(level) + " Lives: " + std::to_string(lives) + " Hlth: " + std::to_string(10 * health) + "% Wtr: " + std::to_string(squirts) + " Gld: " + std::to_string(gold) + " Oil Left: " + std::to_string(barrelsLeft) + " Sonar: " + std::to_string(sonar) + " Scr: " + std::to_string(score);
     setGameStatText(s);
 }
 int StudentWorld::move()
 {
     tick++;
     string type = "";
-   
+
     if (tick == 1) {
         //TODO: where is he actually supposed to appear not sure
-        actorPtrs.push_back(new Protester(this, 30, 40, player));
+        actorPtrs.push_back(new Protester(this, 60, 60, player, TID_PROTESTER));
         numProtesters++;
     }
-    if (timeSinceLastProtester == std::max(25, 200- static_cast<int>(getLevel()))) {
+    if (timeSinceLastProtester == std::max(25, 200 - static_cast<int>(getLevel()))) {
         int level = static_cast<int>(getLevel());
-//        int P = min(15, (2 + (level * 1.5)));'
-        int a = 2 + level*1.5;
+        //        int P = min(15, (2 + (level * 1.5)));'
+        int a = 2 + level * 1.5;
         int i = std::min(15, a);
         if (numProtesters < i) {
-            actorPtrs.push_back(new Protester(this, 25, 60, player));
+
+            int probabilityOfHardcore = min(90, level * 10 + 30);
+            int chanceOfHardcore = rand() % probabilityOfHardcore;
+            if (chanceOfHardcore == 1) {
+                actorPtrs.push_back(new HardcoreProtester(this, 60,60, player));
+            }
+            else {
+                actorPtrs.push_back(new Protester(this, 60, 60, player, TID_PROTESTER));
+            }
             numProtesters++;
         }
         timeSinceLastProtester = 0;
     }
-    /// This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
-    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-    //
+    
+    
     if (barrelCount == 0) {
         vector<Actor*>::iterator it;
         it = actorPtrs.begin();
@@ -303,9 +336,9 @@ int StudentWorld::move()
                 delete (*it);
                 it = actorPtrs.erase(it);
             }*/
-            
-                delete (*it);
-                it = actorPtrs.erase(it);
+
+            delete (*it);
+            it = actorPtrs.erase(it);
 
 
         }
@@ -325,32 +358,33 @@ int StudentWorld::move()
 //        tick = 0;
         return GWSTATUS_PLAYER_DIED;
     }
+   
     // if player is not alive, delete stuff and restart level
     if (player->isAlive() != true) {
         vector<Actor*>::iterator it;
         it = actorPtrs.begin();
         while (it != actorPtrs.end()) {
-                delete (*it);
-                it = actorPtrs.erase(it);
+            delete (*it);
+            it = actorPtrs.erase(it);
         }
         barrelCount = 0; // needed to reset level barrel count
         tick = 0;
         return GWSTATUS_PLAYER_DIED;
     }
-    
-    if (m_shoot == true && player->numWater()!=0) {
-        actorPtrs.push_back(new Squirt(this, player->getX(), player->getY(), player,player->getDirection()));
+
+    if (m_shoot == true && player->numWater() != 0) {
+        actorPtrs.push_back(new Squirt(this, player->getX(), player->getY(), player, player->getDirection()));
         player->decreaseSquirts();
         m_shoot = false;
-        
+
     }
 
     setDisplayText();
     player->doSomething();
     populatePoolsOrSonar();
-//    populateSonar();
+    //    populateSonar();
 
-    // Allow all actors to do something
+        // Allow all actors to do something
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
     while (it != actorPtrs.end()) {
@@ -386,7 +420,7 @@ void StudentWorld::cleanUp()
             delete earthPtrs[x][y];
         }
     }
-    
+
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
     while (it != actorPtrs.end()) {
@@ -407,14 +441,14 @@ void StudentWorld::cleanUp()
 /*Remove/destroy the Earth objects from the 4x4 area occupied by
 the Tunnelman (from x, y to x+3,y+3 inclusive)*/
 void StudentWorld::digField(int x, int y) {
-   
+
     for (int k = x; k <= x + 3 && (k >= 0 && k < VIEW_WIDTH); k++) {
         for (int j = y; j <= y + 3 && (j >= 0 && j < VIEW_HEIGHT); j++) {
             delete earthPtrs[k][j];
             earthPtrs[k][j] = nullptr;
         }
     }
-  
+
 }
 bool StudentWorld::isthereEarth(int x, int y) {
     for (int k = x; k <= x + 3 && (k >= 0 && k < VIEW_WIDTH); k++) {
@@ -427,31 +461,32 @@ bool StudentWorld::isthereEarth(int x, int y) {
 
 
 }
+
 bool StudentWorld::isBoulderthere(int xPos, int yPos) {
 
     // xPos & yPos is related to the tunnelman :(
     vector<Actor*>::iterator it;
     it = actorPtrs.begin();
-    while (it!= actorPtrs.end()) {
+    while (it != actorPtrs.end()) {
         if ((*it)->getID() == TID_BOULDER) {
             for (int k = xPos; k <= xPos + 3 && (k >= 0 && k < VIEW_WIDTH); k++) {
                 for (int j = yPos; j <= yPos + 3 && (j >= 0 && j < VIEW_HEIGHT); j++) {
                     //                if ((*it)->getX() == k && (*it)->getY() == j) {
                     //                    if ((*it)->getID() == TID_BOULDER) {
-                    if ((*it)->isCoordinate(k,j)) {
+                    if ((*it)->isCoordinate(k, j)) {
                         return true;
                     }
                 }
             }
-            
+
         }
         it++;
     }
-    
+
     return false;
 }
-    
-    //    vector<Actor*>::iterator it;
+
+//    vector<Actor*>::iterator it;
 //    it = actorPtrs.begin();
 //
 //    while (it != actorPtrs.end()) {
@@ -480,9 +515,34 @@ void StudentWorld::decrementBarrelCount() {
         barrelCount--;
     }
 }
+
+bool StudentWorld::isInRadius(int radius, int x1, int y1, int x2, int y2) {
+    double one = (x2-x1)*(x2-x1);
+    double two = (y2-y1)*(y2-y1);
+    double distance = sqrt(one + two);
+    if (distance <= radius) {
+        return true;
+    }
+    return false;
+}
+
+// Illuminate everything in radius 12 of tunnelman
+void StudentWorld::illuminate(int x, int y) {
+    vector<Actor*>::iterator it = actorPtrs.begin();
+    while (it != actorPtrs.end()) {
+        if ((*it)->getID() != TID_BOULDER) {
+            if (!(*it)->isVisible()) {
+                if (isInRadius(12, x, y, (*it)->getX(), (*it)->getY())) {
+                    (*it)->setVisible(true);
+                }
+            }
+        }
+        it++;
+    }
+}
 //bool StudentWorld::isProtesterThere(int x, int y) {
 //    vector<Actor*>::iterator it = actorPtrs.begin();
-//    while (it!= actorPtrs.end()) {
+//    while (it!= actorPtrs.end(q)) {
 //        if ((*it)->getID() == TID_PROTESTER || (*it)->getID() == TID_HARD_CORE_PROTESTER) {
 //            int xP = (*it)->getX();
 //            int yP = (*it)->getY();

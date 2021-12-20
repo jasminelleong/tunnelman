@@ -93,7 +93,7 @@ class Squirt : public Actor {
 public:
     Squirt(StudentWorld* sw, int startX, int startY, Tunnelman* p, Direction d);
     ~Squirt();
-     void doSomething();
+    void doSomething();
     std::string getState() {
         return m_state;
     }
@@ -112,20 +112,26 @@ private:
 
 class Protester : public Actor {
 public:
-    Protester(StudentWorld* sw, int startX, int startY, Tunnelman* p);
+    Protester(StudentWorld* sw, int startX, int startY, Tunnelman* p, int imageID);
     ~Protester();
     void doSomething();
     std::string classType();
     void move();
-//    bool isCoordinate(int otherX, int otherY, std::string& type);
+    bool getShot();
+    //    bool isCoordinate(int otherX, int otherY, std::string& type);
     bool isNearTunnelman();
     bool isFacingTunnelman();
     void setNewDirection();
     bool takePerpendicularTurn();
     void decrementHealth(int howMuch);
+    bool stunProtest();
+    void setHp(int hp);
 private:
+    bool stun;
+    int restP;
     int yellWaitingNum;
-    int perpendicularRestingNum =200;
+    int annoy;
+    int perpendicularRestingNum = 200;
     int waitingNum;
     int numSquaresToMoveInCurrentDirection;
     int m_hp;
@@ -154,16 +160,15 @@ public:
 private:
     Tunnelman* playerInGame;
 };
-/**/
+
 class Nuggets : public Goodies {
 public:
     Nuggets(StudentWorld* sw, int startX, int startY, Tunnelman* p, std::string state);
     ~Nuggets();
     void doSomething();
-  
+
     std::string classType();
-    // void setState(std::string state);
- // void makeVisible();
+    
 
 private:
     std::string m_state;
@@ -174,18 +179,17 @@ private:
     int waitingNum;
     Tunnelman* playerInGame;
 };
-/**/
+
 class Barrel : public Goodies {
 public:
     Barrel(StudentWorld* sw, int startX, int startY, Tunnelman* p);
     ~Barrel();
     void doSomething();
-//    void setState(std::string state);
-//    void makeVisible();
+    
     std::string classType();
 
 private:
-//    std::string m_state;
+   
     int m_x;
     int m_y;
     bool found;
@@ -213,7 +217,7 @@ class SonarKit : public Goodies {
 public:
     SonarKit(StudentWorld* sw, int startX, int startY, Tunnelman* p);
     ~SonarKit();
-//    void setState(std::string state);
+    //    void setState(std::string state);
     void doSomething();
     std::string classType();
     std::string getID();
